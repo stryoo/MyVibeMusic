@@ -60,9 +60,11 @@ export async function getMusicRecommendations(
       recommendations: list,
       selectedVideo: list[0] ?? null,
       fallbackUsed: normalized.length === 0,
+      fallbackReason: normalized.length === 0 ? "no_usable_youtube_results" : undefined,
       fetchedAt: new Date().toISOString()
     };
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_youtube_error";
     return {
       coordinates,
       location,
@@ -72,6 +74,8 @@ export async function getMusicRecommendations(
       recommendations: fallbackList,
       selectedVideo: fallbackList[0] ?? null,
       fallbackUsed: true,
+      fallbackReason: "youtube_api_error",
+      fallbackDetail: message,
       fetchedAt: new Date().toISOString()
     };
   }

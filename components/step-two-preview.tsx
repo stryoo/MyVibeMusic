@@ -38,6 +38,10 @@ export function StepTwoPreview() {
   const isLoading = status === "loading";
   const selectedVideo = getSelectedVideo(recommendations, selectedVideoId);
   const theme = getWeatherTheme(weatherContext?.weather.mood, emotion);
+  const fallbackMessage = getFallbackMessage(
+    recommendations?.fallbackReason,
+    recommendations?.fallbackDetail
+  );
 
   useEffect(() => {
     void refresh(DEFAULT_COORDINATES);
@@ -264,6 +268,12 @@ export function StepTwoPreview() {
                 {errorMessage}
               </GlassCard>
             ) : null}
+
+            {!errorMessage && fallbackMessage ? (
+              <GlassCard className="border border-amber-200/35 bg-amber-300/12 text-sm text-amber-50">
+                {fallbackMessage}
+              </GlassCard>
+            ) : null}
           </motion.aside>
         </div>
       </section>
@@ -362,6 +372,26 @@ function AnchorTab({ href, icon, label }: { href: string; icon: React.ReactNode;
       <span>{label}</span>
     </a>
   );
+}
+
+function getFallbackMessage(reason?: string, detail?: string) {
+  if (!reason) {
+    return null;
+  }
+
+  if (reason === "youtube_api_error" && detail?.includes("quotaExceeded")) {
+    return "YouTube API 할당량을 초과해 현재는 기본 추천 리스트를 보여주고 있어요. 할당량이 리셋되거나 새 API 키를 연결하면 실시간 추천으로 돌아옵니다.";
+  }
+
+  if (reason === "youtube_api_error") {
+    return "YouTube 추천을 불러오는 중 문제가 있어 기본 추천 리스트를 보여주고 있어요.";
+  }
+
+  if (reason === "no_usable_youtube_results") {
+    return "현재 조건에 맞는 재생 가능한 유튜브 결과가 적어 기본 추천 리스트를 보여주고 있어요.";
+  }
+
+  return "추천 데이터를 불러오는 중 일부 제한이 있어 기본 추천 리스트를 보여주고 있어요.";
 }
 
 function ContextSkeleton() {

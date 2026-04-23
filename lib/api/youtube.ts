@@ -62,6 +62,14 @@ function getSearchProfile(style?: MusicStyle) {
   }
 }
 
+type SearchAttempt = {
+  videoCategoryId?: string;
+  videoEmbeddable?: string;
+  videoSyndicated?: string;
+  regionCode?: string;
+  relevanceLanguage?: string;
+};
+
 function toWatchUrl(videoId: string) {
   return `https://www.youtube.com/watch?v=${videoId}`;
 }
@@ -130,38 +138,87 @@ export async function searchYoutubeMusic(
   musicStyle?: MusicStyle
 ): Promise<RecommendationItem[]> {
   const profile = getSearchProfile(musicStyle);
-  const url = new URL("https://www.googleapis.com/youtube/v3/search");
-  url.searchParams.set("key", serverEnv.youtubeDataApiKey);
-  url.searchParams.set("part", "snippet");
-  url.searchParams.set("type", "video");
-  url.searchParams.set("videoCategoryId", "10");
-  url.searchParams.set("maxResults", RECOMMENDATION_LIMIT.toString());
-  url.searchParams.set("q", query);
-  url.searchParams.set("regionCode", profile.regionCode);
-  url.searchParams.set("relevanceLanguage", profile.relevanceLanguage);
-  url.searchParams.set("safeSearch", "moderate");
-  url.searchParams.set("videoEmbeddable", "true");
-  url.searchParams.set("videoSyndicated", "true");
+  const attemptErrors: string[] = [];
+  const attempts: SearchAttempt[] = [
+    {
+      videoCategoryId: "10",
+      videoEmbeddable: "true",
+      videoSyndicated: "true",
+      regionCode: profile.regionCode,
+      relevanceLanguage: profile.relevanceLanguage
+    },
+    {
+      videoEmbeddable: "true",
+      videoSyndicated: "true",
+      regionCode: profile.regionCode,
+      relevanceLanguage: profile.relevanceLanguage
+    },
+    {
+      regionCode: profile.regionCode,
+      relevanceLanguage: profile.relevanceLanguage
+    },
+    {}
+  ];
 
-  const data = await fetchJson<YouTubeSearchResponse>(url, {
-    next: { revalidate: 900 }
-  });
+  for (const attempt of attempts) {
+    try {
+      const url = new URL("https://www.googleapis.com/youtube/v3/search");
+      url.searchParams.set("key", serverEnv.youtubeDataApiKey);
+      url.searchParams.set("part", "snippet");
+      url.searchParams.set("type", "video");
+      url.searchParams.set("maxResults", RECOMMENDATION_LIMIT.toString());
+      url.searchParams.set("q", query);
+      url.searchParams.set("safeSearch", "moderate");
 
-  const searchItems = data.items.filter((item) => item.id.kind === "youtube#video" && item.id.videoId);
-  const videoIds = searchItems.map((item) => item.id.videoId as string);
+      if (attempt.videoCategoryId) {
+        url.searchParams.set("videoCategoryId", attempt.videoCategoryId);
+      }
+      if (attempt.videoEmbeddable) {
+        url.searchParams.set("videoEmbeddable", attempt.videoEmbeddable);
+      }
+      if (attempt.videoSyndicated) {
+        url.searchParams.set("videoSyndicated", attempt.videoSyndicated);
+      }
+      if (attempt.regionCode) {
+        url.searchParams.set("regionCode", attempt.regionCode);
+      }
+      if (attempt.relevanceLanguage) {
+        url.searchParams.set("relevanceLanguage", attempt.relevanceLanguage);
+      }
 
-  try {
-    const hydratedMap = await fetchYouTubeVideoDetails(videoIds);
-    const hydratedItems = videoIds
-      .map((videoId) => hydratedMap.get(videoId))
-      .filter((item): item is RecommendationItem => Boolean(item));
+      const data = await fetchJson<YouTubeSearchResponse>(url, {
+        next: { revalidate: 900 }
+      });
 
-    if (hydratedItems.length > 0) {
-      return hydratedItems;
+      const searchItems = data.items.filter((item) => item.id.kind === "youtube#video" && item.id.videoId);
+      const videoIds = searchItems.map((item) => item.id.videoId as string);
+
+      try {
+        const hydratedMap = await fetchYouTubeVideoDetails(videoIds);
+        const hydratedItems = videoIds
+          .map((videoId) => hydratedMap.get(videoId))
+          .filter((item): item is RecommendationItem => Boolean(item));
+
+        if (hydratedItems.length > 0) {
+          return hydratedItems;
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "video_details_lookup_failed";
+        attemptErrors.push(`details:${message}`);
+      }
+
+      if (searchItems.length > 0) {
+        return searchItems.map((item) => toRecommendationItem(item.id.videoId as string, item));
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "youtube_search_failed";
+      attemptErrors.push(message);
     }
-  } catch {
-    // Fall back to search metadata when details lookup fails.
   }
 
-  return searchItems.map((item) => toRecommendationItem(item.id.videoId as string, item));
+  if (attemptErrors.length > 0) {
+    throw new Error(attemptErrors.join(" | "));
+  }
+
+  return [];
 }
