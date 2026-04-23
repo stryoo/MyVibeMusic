@@ -13,15 +13,18 @@ function buildEmbedUrl(videoId: string) {
   url.searchParams.set("playsinline", "1");
   url.searchParams.set("rel", "0");
   url.searchParams.set("modestbranding", "1");
+  url.searchParams.set("start", "0");
   return url.toString();
 }
 
 export function YouTubePlayer({ videoId, className = "" }: Props) {
   return (
-    <div className={`relative overflow-hidden rounded-[24px] bg-black ${className}`}>
+    <div
+      key={videoId ?? "empty-player"}
+      className={`relative overflow-hidden rounded-[24px] bg-black ${className}`}
+    >
       {videoId ? (
         <iframe
-          key={videoId}
           src={buildEmbedUrl(videoId)}
           title="YouTube player"
           className="absolute inset-0 h-full w-full"
@@ -37,4 +40,3 @@ export function YouTubePlayer({ videoId, className = "" }: Props) {
     </div>
   );
 }
-

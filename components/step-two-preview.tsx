@@ -237,6 +237,7 @@ export function StepTwoPreview() {
                       <div className="relative">
                         <div className={`pointer-events-none absolute -inset-4 rounded-[26px] ${theme.glow}`} />
                         <YouTubePlayer
+                          key={selectedVideo?.videoId ?? "empty-player"}
                           videoId={selectedVideo?.videoId ?? null}
                           className="relative aspect-square rounded-[24px] border border-white/10"
                         />
