@@ -36,6 +36,25 @@ function getMomentLabel(weather: WeatherSnapshot) {
   return weather.isDaytime ? "오늘" : "오늘 밤";
 }
 
+function getBroadLocationHint(location: LocationSnapshot) {
+  const city = location.city.trim();
+
+  if (!city) {
+    return "";
+  }
+
+  if (city === "서울") return "서울권";
+  if (city === "경기") return "경기권";
+  if (city === "인천") return "인천권";
+  if (city === "부산") return "부산권";
+  if (city === "대구") return "대구권";
+  if (city === "광주") return "광주권";
+  if (city === "대전") return "대전권";
+  if (city === "울산") return "울산권";
+
+  return city;
+}
+
 export function buildYoutubeSearchQuery(
   location: LocationSnapshot,
   weather: WeatherSnapshot,
@@ -43,12 +62,23 @@ export function buildYoutubeSearchQuery(
   musicStyle?: MusicStyle
 ) {
   const moment = getMomentLabel(weather);
-  const place = location.stationLikeLabel || location.district || location.city;
   const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
   const moodPhrase = getWeatherMusicKeyword(weather);
   const stylePhrase = getMusicStyleQuery(musicStyle);
+  const locationHint = getBroadLocationHint(location);
 
-  return `${moment} ${place}에서 듣기 좋은 ${vibe.weatherKeyword} ${vibe.timeKeyword} ${vibe.emotionKeyword} ${moodPhrase} ${stylePhrase}`
+  return [
+    stylePhrase,
+    moment,
+    vibe.timeLabel,
+    vibe.timeKeyword,
+    vibe.weatherKeyword,
+    vibe.emotionKeyword,
+    moodPhrase,
+    locationHint
+  ]
+    .filter(Boolean)
+    .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 }
