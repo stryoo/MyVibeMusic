@@ -120,8 +120,8 @@ export function buildVibeContext(
   const weatherKeywords = weather.isDaytime ? weatherConfig.keywordsDay : weatherConfig.keywordsNight;
   const emotionConfig = EMOTION_TABLE[emotion];
 
-  const timeKeyword = pickStable(timeConfig.keywords, `${timeBand}:${weather.mood}`);
-  const weatherKeyword = pickStable(weatherKeywords, `${weather.mood}:${timeBand}`);
+  const timeKeyword = pickStable(timeConfig.keywords, `${timeBand}:${weather.mood}:${emotion}`);
+  const weatherKeyword = pickStable(weatherKeywords, `${weather.mood}:${timeBand}:${emotion}`);
   const emotionKeyword = pickStable(emotionConfig.keywords, `${emotion}:${timeBand}:${weather.mood}`);
 
   return {
