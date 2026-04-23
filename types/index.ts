@@ -61,6 +61,7 @@ export type RecommendationItem = {
   channelTitle: string;
   thumbnailUrl: string;
   description: string;
+  watchUrl?: string;
 };
 
 export type RecommendationPayload = {
