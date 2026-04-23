@@ -73,17 +73,23 @@ function pickStable(list: string[], key: string) {
   return list[sum % list.length] ?? list[0] ?? "";
 }
 
-export function getWeatherLocalDate(weather: WeatherSnapshot, fallbackNow = new Date()) {
+function getWeatherLocalHour(weather: WeatherSnapshot, fallbackNow = new Date()) {
   if (Number.isFinite(weather.observedAt) && Number.isFinite(weather.timezoneOffsetSeconds)) {
-    return new Date((weather.observedAt + weather.timezoneOffsetSeconds) * 1000);
+    const totalHours = Math.floor((weather.observedAt + weather.timezoneOffsetSeconds) / 3600);
+    return ((totalHours % 24) + 24) % 24;
   }
 
-  return fallbackNow;
+  return fallbackNow.getHours();
 }
 
-export function getTimeBand(date: Date): { band: TimeBand; config: TimeBandConfig } {
-  const hour = date.getHours();
+export function getWeatherLocalDate(weather: WeatherSnapshot, fallbackNow = new Date()) {
+  const hour = getWeatherLocalHour(weather, fallbackNow);
+  const snapshot = new Date(fallbackNow);
+  snapshot.setHours(hour, 0, 0, 0);
+  return snapshot;
+}
 
+export function getTimeBandFromHour(hour: number): { band: TimeBand; config: TimeBandConfig } {
   for (const row of TIME_BAND_TABLE) {
     if (row.from < row.to) {
       if (hour >= row.from && hour < row.to) {
@@ -98,6 +104,10 @@ export function getTimeBand(date: Date): { band: TimeBand; config: TimeBandConfi
   }
 
   return { band: "afternoon", config: TIME_BAND_TABLE[3]!.config };
+}
+
+export function getTimeBand(date: Date): { band: TimeBand; config: TimeBandConfig } {
+  return getTimeBandFromHour(date.getHours());
 }
 
 export function buildVibeContext(

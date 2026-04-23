@@ -32,7 +32,7 @@ export async function getMusicRecommendations(
 
   const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
   const query = buildYoutubeSearchQuery(location, weather, emotion, musicStyle);
-  const fallbackList = getFallbackRecommendations(emotion, musicStyle);
+  const fallbackList = getFallbackRecommendations(emotion, musicStyle, query);
 
   try {
     const recommendations = await searchYoutubeMusic(query, musicStyle);

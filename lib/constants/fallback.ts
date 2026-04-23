@@ -536,6 +536,14 @@ const FALLBACK_BY_STYLE: Record<MusicStyle, RecommendationItem[]> = {
   ]
 };
 
+function hashSeed(seed: string) {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) % 2147483647;
+  }
+  return hash;
+}
+
 function pickRotatedList(list: RecommendationItem[], offset: number, size = 5) {
   if (list.length <= size) {
     return list;
@@ -546,11 +554,14 @@ function pickRotatedList(list: RecommendationItem[], offset: number, size = 5) {
 
 export function getFallbackRecommendations(
   emotion?: Emotion,
-  musicStyle?: MusicStyle
+  musicStyle?: MusicStyle,
+  seed?: string
 ): RecommendationItem[] {
   if (musicStyle) {
     const styleList = FALLBACK_BY_STYLE[musicStyle] ?? FALLBACK_RECOMMENDATIONS;
-    const offset = emotion ? EMOTION_STYLE_OFFSETS[emotion] : 0;
+    const emotionOffset = emotion ? EMOTION_STYLE_OFFSETS[emotion] : 0;
+    const seedOffset = seed ? hashSeed(seed) % styleList.length : 0;
+    const offset = (emotionOffset + seedOffset) % styleList.length;
     return pickRotatedList(styleList, offset);
   }
 
