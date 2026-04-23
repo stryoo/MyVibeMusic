@@ -4,6 +4,7 @@ import { create } from "zustand";
 import type {
   Coordinates,
   Emotion,
+  MusicStyle,
   RecommendationItem,
   RecommendationPayload,
   WeatherContextPayload
@@ -15,6 +16,7 @@ export type AppLoadStatus = "idle" | "loading" | "success" | "error";
 type AppState = {
   coordinates: Coordinates | null;
   emotion: Emotion;
+  musicStyle: MusicStyle;
   weatherContext: WeatherContextPayload | null;
   recommendations: RecommendationPayload | null;
   selectedVideoId: string | null;
@@ -22,6 +24,7 @@ type AppState = {
   errorMessage: string | null;
 
   setEmotion: (emotion: Emotion) => void;
+  setMusicStyle: (musicStyle: MusicStyle) => void;
   selectVideo: (videoId: string) => void;
   hydrateFromRecommendations: (payload: RecommendationPayload) => void;
   refresh: (coordinates: Coordinates) => Promise<void>;
@@ -31,6 +34,7 @@ type AppState = {
 export const useAppStore = create<AppState>((set, get) => ({
   coordinates: null,
   emotion: "calm",
+  musicStyle: "kpop",
   weatherContext: null,
   recommendations: null,
   selectedVideoId: null,
@@ -40,6 +44,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   clearError: () => set({ errorMessage: null }),
 
   setEmotion: (emotion) => set({ emotion }),
+  setMusicStyle: (musicStyle) => set({ musicStyle }),
 
   selectVideo: (videoId) => set({ selectedVideoId: videoId }),
 
@@ -63,9 +68,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       const emotion = get().emotion;
+      const musicStyle = get().musicStyle;
       const [contextPayload, recommendationPayload] = await Promise.all([
-        fetchWeatherContext(coordinates, emotion),
-        fetchRecommendations(coordinates, emotion)
+        fetchWeatherContext(coordinates, emotion, musicStyle),
+        fetchRecommendations(coordinates, emotion, musicStyle)
       ]);
 
       const firstVideoId =

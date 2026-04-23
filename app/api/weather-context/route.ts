@@ -6,6 +6,7 @@ import {
   createFallbackWeatherSnapshot
 } from "@/lib/recommendation/fallback-snapshots";
 import { parseEmotion } from "@/lib/recommendation/emotion";
+import { parseMusicStyle } from "@/lib/recommendation/music-style";
 import { buildVibeContext } from "@/lib/recommendation/vibe-map";
 import { buildContextLabel, buildYoutubeSearchQuery } from "@/lib/recommendation/query-builder";
 import type { Coordinates } from "@/types";
@@ -26,6 +27,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const coordinates = parseCoordinates(searchParams);
   const emotion = parseEmotion(searchParams.get("emotion"));
+  const musicStyle = parseMusicStyle(searchParams.get("musicStyle"));
 
   if (!coordinates) {
     return NextResponse.json(
@@ -49,7 +51,7 @@ export async function GET(request: Request) {
         location,
         weather,
         context: buildContextLabel(location, weather, emotion),
-        query: buildYoutubeSearchQuery(location, weather, emotion),
+        query: buildYoutubeSearchQuery(location, weather, emotion, musicStyle),
         fallbackUsed: true,
         vibe: buildVibeContext(weather, new Date(), emotion)
       },
@@ -76,7 +78,7 @@ export async function GET(request: Request) {
     location,
     weather,
     context: buildContextLabel(location, weather, emotion),
-    query: buildYoutubeSearchQuery(location, weather, emotion),
+    query: buildYoutubeSearchQuery(location, weather, emotion, musicStyle),
     fallbackUsed: weatherResult.status === "rejected" || locationResult.status === "rejected",
     vibe: buildVibeContext(weather, new Date(), emotion)
   });

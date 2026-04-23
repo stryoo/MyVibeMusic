@@ -13,10 +13,11 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { EMOTIONS } from "@/lib/recommendation/emotion";
+import { MUSIC_STYLES } from "@/lib/recommendation/music-style";
 import { getWeatherTheme } from "@/lib/ui/weather-theme";
 import { YouTubePlayer } from "@/components/youtube-player";
 import { getSelectedVideo, useAppStore } from "@/stores/app-store";
-import type { Coordinates, Emotion } from "@/types";
+import type { Coordinates, Emotion, MusicStyle } from "@/types";
 
 const DEFAULT_COORDINATES: Coordinates = { lat: 37.4979, lon: 127.0276 };
 
@@ -28,7 +29,9 @@ export function StepTwoPreview() {
   const status = useAppStore((state) => state.status);
   const errorMessage = useAppStore((state) => state.errorMessage);
   const emotion = useAppStore((state) => state.emotion);
+  const musicStyle = useAppStore((state) => state.musicStyle);
   const setEmotion = useAppStore((state) => state.setEmotion);
+  const setMusicStyle = useAppStore((state) => state.setMusicStyle);
   const refresh = useAppStore((state) => state.refresh);
   const selectVideo = useAppStore((state) => state.selectVideo);
 
@@ -42,6 +45,11 @@ export function StepTwoPreview() {
 
   function handleSelectEmotion(nextEmotion: Emotion) {
     setEmotion(nextEmotion);
+    void refresh(coordinates);
+  }
+
+  function handleSelectMusicStyle(nextStyle: MusicStyle) {
+    setMusicStyle(nextStyle);
     void refresh(coordinates);
   }
 
@@ -102,6 +110,26 @@ export function StepTwoPreview() {
             })}
           </div>
 
+          <div className="mt-3 flex flex-wrap gap-2">
+            {MUSIC_STYLES.map((item) => {
+              const active = item.id === musicStyle;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelectMusicStyle(item.id)}
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
+                    active
+                      ? `bg-gradient-to-r ${theme.accent} ${theme.chip} text-white`
+                      : "border-white/15 bg-white/8 text-white/75 hover:bg-white/15"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <ActionButton onClick={() => void refresh(DEFAULT_COORDINATES)} disabled={isLoading}>
               <RefreshCcw className="h-4 w-4" />
@@ -138,6 +166,7 @@ export function StepTwoPreview() {
 
               <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
                 <StatusPill label={`Emotion: ${emotion}`} />
+                <StatusPill label={`Style: ${musicStyle}`} />
                 <StatusPill label={`Kakao: ${weatherContext?.fallbackUsed ? "Fallback" : "Live"}`} />
                 <StatusPill label={`YouTube: ${recommendations?.fallbackUsed ? "Fallback" : "Live"}`} />
               </div>
@@ -371,4 +400,3 @@ function PlayerSkeleton() {
     </div>
   );
 }
-

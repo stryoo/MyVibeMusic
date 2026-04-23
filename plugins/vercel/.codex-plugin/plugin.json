@@ -1,0 +1,32 @@
+{
+  "name": "vercel",
+  "version": "0.1.0",
+  "description": "Vercel deployment helper plugin scaffold for Codex.",
+  "author": {
+    "name": "[TODO: author-name]",
+    "email": "[TODO: author-email]",
+    "url": "[TODO: author-url]"
+  },
+  "homepage": "https://vercel.com/",
+  "repository": "[TODO: repository-url]",
+  "license": "MIT",
+  "keywords": ["vercel", "deployment", "nextjs", "hosting"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Vercel",
+    "shortDescription": "Scaffold for Vercel deployment workflows",
+    "longDescription": "A local Codex plugin scaffold for Vercel-oriented deployment workflows, environment variable setup, and production checks.",
+    "developerName": "[TODO: developer-name]",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://vercel.com/",
+    "privacyPolicyURL": "https://vercel.com/legal/privacy-policy",
+    "termsOfServiceURL": "https://vercel.com/legal/terms",
+    "defaultPrompt": [
+      "Prepare this Next.js app for Vercel deployment.",
+      "Check required environment variables for production.",
+      "Review this project for Vercel build issues."
+    ],
+    "brandColor": "#111827"
+  }
+}

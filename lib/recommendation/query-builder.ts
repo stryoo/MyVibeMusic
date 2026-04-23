@@ -1,21 +1,22 @@
-import type { Emotion, LocationSnapshot, WeatherSnapshot } from "@/types";
+import { getMusicStyleQuery } from "@/lib/recommendation/music-style";
 import { buildVibeContext } from "@/lib/recommendation/vibe-map";
+import type { Emotion, LocationSnapshot, MusicStyle, WeatherSnapshot } from "@/types";
 
 function getWeatherMusicKeyword(weather: WeatherSnapshot) {
   switch (weather.mood) {
     case "rain":
-      return "음악";
+      return "감성 플레이리스트";
     case "snow":
-      return "음악";
+      return "포근한 플레이리스트";
     case "clouds":
-      return "음악";
+      return "무드 플레이리스트";
     case "thunderstorm":
-      return "집중 음악";
+      return "몰입용 플레이리스트";
     case "mist":
-      return "감성 음악";
+      return "몽환적인 플레이리스트";
     case "clear":
     default:
-      return weather.isDaytime ? "기분 좋은 음악" : "드라이브 음악";
+      return weather.isDaytime ? "기분 좋은 플레이리스트" : "드라이브 플레이리스트";
   }
 }
 
@@ -29,7 +30,7 @@ function getMomentLabel(weather: WeatherSnapshot) {
   }
 
   if (weather.mood === "clouds") {
-    return weather.isDaytime ? "흐린 오후" : "흐린 저녁";
+    return weather.isDaytime ? "흐린 오후" : "흐린 밤";
   }
 
   return weather.isDaytime ? "오늘" : "오늘 밤";
@@ -38,15 +39,16 @@ function getMomentLabel(weather: WeatherSnapshot) {
 export function buildYoutubeSearchQuery(
   location: LocationSnapshot,
   weather: WeatherSnapshot,
-  emotion?: Emotion
+  emotion?: Emotion,
+  musicStyle?: MusicStyle
 ) {
   const moment = getMomentLabel(weather);
   const place = location.stationLikeLabel || location.district || location.city;
   const vibe = buildVibeContext(weather, new Date(), emotion);
-  const musicKeyword = getWeatherMusicKeyword(weather);
+  const moodPhrase = getWeatherMusicKeyword(weather);
+  const stylePhrase = getMusicStyleQuery(musicStyle);
 
-  // Intentionally avoid explicit genre tokens; keep it "mood-based".
-  return `${moment} ${place}에서 듣기 좋은 ${vibe.weatherKeyword} ${vibe.timeKeyword} ${vibe.emotionKeyword} ${musicKeyword}`
+  return `${moment} ${place}에서 듣기 좋은 ${vibe.weatherKeyword} ${vibe.timeKeyword} ${vibe.emotionKeyword} ${moodPhrase} ${stylePhrase}`
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -60,4 +62,3 @@ export function buildContextLabel(
   const vibe = buildVibeContext(weather, new Date(), emotion);
   return `${location.city} ${location.district}, ${moment} (${vibe.timeLabel})`;
 }
-

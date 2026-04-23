@@ -2,6 +2,7 @@ import { getMissingServerEnvKeys, hasRequiredServerEnv } from "@/lib/config/env"
 import { getFallbackRecommendations } from "@/lib/constants/fallback";
 import { getMusicRecommendations } from "@/lib/recommendation/service";
 import { parseEmotion } from "@/lib/recommendation/emotion";
+import { parseMusicStyle } from "@/lib/recommendation/music-style";
 import type { Coordinates } from "@/types";
 import { NextResponse } from "next/server";
 
@@ -20,7 +21,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const coordinates = parseCoordinates(searchParams);
   const emotion = parseEmotion(searchParams.get("emotion"));
-  const fallbackList = getFallbackRecommendations(emotion);
+  const musicStyle = parseMusicStyle(searchParams.get("musicStyle"));
+  const fallbackList = getFallbackRecommendations(emotion, musicStyle);
 
   if (!coordinates) {
     return NextResponse.json(
@@ -46,7 +48,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const payload = await getMusicRecommendations(coordinates, emotion);
+    const payload = await getMusicRecommendations(coordinates, emotion, musicStyle);
     return NextResponse.json(payload, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown recommendation error";

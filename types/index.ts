@@ -32,6 +32,8 @@ export type Emotion =
   | "romantic"
   | "energetic";
 
+export type MusicStyle = "kpop" | "pop" | "ballad" | "indie" | "hiphop";
+
 export type VibeContext = {
   timeBand: TimeBand;
   timeLabel: string;

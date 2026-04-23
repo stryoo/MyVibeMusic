@@ -9,11 +9,12 @@ import {
 import { searchYoutubeMusic } from "@/lib/api/youtube";
 import { buildYoutubeSearchQuery } from "@/lib/recommendation/query-builder";
 import { buildVibeContext } from "@/lib/recommendation/vibe-map";
-import type { Coordinates, Emotion, RecommendationPayload } from "@/types";
+import type { Coordinates, Emotion, MusicStyle, RecommendationPayload } from "@/types";
 
 export async function getMusicRecommendations(
   coordinates: Coordinates,
-  emotion?: Emotion
+  emotion?: Emotion,
+  musicStyle?: MusicStyle
 ): Promise<RecommendationPayload> {
   const [weatherResult, locationResult] = await Promise.allSettled([
     getWeatherSnapshot(coordinates),
@@ -30,11 +31,11 @@ export async function getMusicRecommendations(
       : createFallbackLocationSnapshot();
 
   const vibe = buildVibeContext(weather, new Date(), emotion);
-  const query = buildYoutubeSearchQuery(location, weather, emotion);
-  const fallbackList = getFallbackRecommendations(emotion);
+  const query = buildYoutubeSearchQuery(location, weather, emotion, musicStyle);
+  const fallbackList = getFallbackRecommendations(emotion, musicStyle);
 
   try {
-    const recommendations = await searchYoutubeMusic(query);
+    const recommendations = await searchYoutubeMusic(query, musicStyle);
     const normalized = recommendations.slice(0, RECOMMENDATION_LIMIT);
     const list = normalized.length > 0 ? normalized : fallbackList;
 
