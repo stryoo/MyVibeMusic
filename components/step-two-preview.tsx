@@ -37,7 +37,7 @@ export function StepTwoPreview() {
 
   const isLoading = status === "loading";
   const selectedVideo = getSelectedVideo(recommendations, selectedVideoId);
-  const theme = getWeatherTheme(weatherContext?.weather.mood);
+  const theme = getWeatherTheme(weatherContext?.weather.mood, emotion);
 
   useEffect(() => {
     void refresh(DEFAULT_COORDINATES);
