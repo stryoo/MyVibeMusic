@@ -7,7 +7,7 @@ import {
   createFallbackWeatherSnapshot
 } from "@/lib/recommendation/fallback-snapshots";
 import { searchYoutubeMusic } from "@/lib/api/youtube";
-import { buildYoutubeSearchQuery } from "@/lib/recommendation/query-builder";
+import { buildYoutubeSearchQueries } from "@/lib/recommendation/query-builder";
 import { buildVibeContext, getWeatherLocalDate } from "@/lib/recommendation/vibe-map";
 import type { Coordinates, Emotion, MusicStyle, RecommendationPayload } from "@/types";
 
@@ -31,12 +31,24 @@ export async function getMusicRecommendations(
       : createFallbackLocationSnapshot();
 
   const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
-  const query = buildYoutubeSearchQuery(location, weather, emotion, musicStyle);
+  const queryCandidates = buildYoutubeSearchQueries(location, weather, emotion, musicStyle);
+  const query = queryCandidates[0] ?? "";
   const fallbackList = getFallbackRecommendations(emotion, musicStyle, query);
 
   try {
-    const recommendations = await searchYoutubeMusic(query, musicStyle);
-    const normalized = recommendations.slice(0, RECOMMENDATION_LIMIT);
+    let finalQuery = query;
+    let normalized = [] as RecommendationPayload["recommendations"];
+
+    for (const candidate of queryCandidates) {
+      const recommendations = await searchYoutubeMusic(candidate, musicStyle);
+      const sliced = recommendations.slice(0, RECOMMENDATION_LIMIT);
+      if (sliced.length > 0) {
+        finalQuery = candidate;
+        normalized = sliced;
+        break;
+      }
+    }
+
     const list = normalized.length > 0 ? normalized : fallbackList;
 
     return {
@@ -44,7 +56,7 @@ export async function getMusicRecommendations(
       location,
       weather,
       vibe,
-      query,
+      query: finalQuery,
       recommendations: list,
       selectedVideo: list[0] ?? null,
       fallbackUsed: normalized.length === 0,

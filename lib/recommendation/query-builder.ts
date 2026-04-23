@@ -55,7 +55,26 @@ function getBroadLocationHint(location: LocationSnapshot) {
   return city;
 }
 
-export function buildYoutubeSearchQuery(
+function compactQuery(parts: Array<string | undefined>) {
+  const tokens = parts
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
+
+  const uniqueTokens: string[] = [];
+  for (const token of tokens) {
+    if (!uniqueTokens.includes(token)) {
+      uniqueTokens.push(token);
+    }
+  }
+
+  return uniqueTokens.join(" ");
+}
+
+export function buildYoutubeSearchQueries(
   location: LocationSnapshot,
   weather: WeatherSnapshot,
   emotion?: Emotion,
@@ -68,19 +87,36 @@ export function buildYoutubeSearchQuery(
   const locationHint = getBroadLocationHint(location);
 
   return [
-    stylePhrase,
-    moment,
-    vibe.timeLabel,
-    vibe.timeKeyword,
-    vibe.weatherKeyword,
-    vibe.emotionKeyword,
-    moodPhrase,
-    locationHint
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
+    compactQuery([
+      stylePhrase,
+      moment,
+      vibe.timeLabel,
+      vibe.timeKeyword,
+      vibe.weatherKeyword,
+      vibe.emotionKeyword,
+      moodPhrase,
+      locationHint
+    ]),
+    compactQuery([
+      stylePhrase,
+      moment,
+      vibe.timeLabel,
+      vibe.weatherKeyword,
+      vibe.emotionKeyword,
+      moodPhrase
+    ]),
+    compactQuery([stylePhrase, moment, vibe.timeKeyword, vibe.emotionKeyword, moodPhrase]),
+    compactQuery([stylePhrase, vibe.emotionKeyword, moodPhrase])
+  ].filter((query, index, list) => Boolean(query) && list.indexOf(query) === index);
+}
+
+export function buildYoutubeSearchQuery(
+  location: LocationSnapshot,
+  weather: WeatherSnapshot,
+  emotion?: Emotion,
+  musicStyle?: MusicStyle
+) {
+  return buildYoutubeSearchQueries(location, weather, emotion, musicStyle)[0] ?? "";
 }
 
 export function buildContextLabel(
