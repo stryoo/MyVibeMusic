@@ -68,7 +68,7 @@ export function StepTwoPreview() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#070f1d] pb-24 text-white">
+    <main className="relative min-h-screen overflow-x-hidden overflow-y-hidden bg-[#070f1d] pb-24 text-white">
       <div className={`pointer-events-none absolute inset-0 ${theme.background}`} />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.08),transparent_24%,rgba(0,0,0,0.24)_100%)]" />
 
@@ -77,7 +77,7 @@ export function StepTwoPreview() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="rounded-[30px] border border-white/20 bg-white/10 p-5 backdrop-blur-2xl sm:p-7"
+          className="max-w-full overflow-hidden rounded-[30px] border border-white/20 bg-white/10 p-5 backdrop-blur-2xl sm:p-7"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.26em] text-white/80">
             <Sparkles className="h-4 w-4" />
@@ -148,7 +148,7 @@ export function StepTwoPreview() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.06, duration: 0.42 }}
-            className="space-y-6"
+            className="min-w-0 space-y-6"
           >
             <GlassCard>
               <CardTitle icon={<CloudSun className="h-5 w-5" />} subtitle="Weather + Location" title="Context" />
@@ -222,7 +222,7 @@ export function StepTwoPreview() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12, duration: 0.42 }}
-            className="space-y-6"
+            className="min-w-0 space-y-6"
           >
             <GlassCard className="relative overflow-hidden">
               <div className={`pointer-events-none absolute -inset-10 rounded-[42px] ${theme.glow}`} />
@@ -241,7 +241,7 @@ export function StepTwoPreview() {
                           className="relative aspect-square rounded-[24px] border border-white/10"
                         />
                       </div>
-                      <h3 className="mt-5 text-lg font-semibold">
+                      <h3 className="mt-5 break-words text-lg font-semibold">
                         {selectedVideo?.title ?? "선택된 곡이 없습니다."}
                       </h3>
                       <p className="mt-2 text-sm text-white/62">{selectedVideo?.channelTitle ?? "채널 정보 없음"}</p>
@@ -331,7 +331,7 @@ function GlassCard({
   return (
     <section
       id={id}
-      className={`rounded-[30px] border border-white/20 bg-white/10 p-5 shadow-[0_24px_80px_rgba(0,10,25,0.35)] backdrop-blur-2xl sm:p-6 ${className}`}
+      className={`min-w-0 max-w-full overflow-hidden rounded-[30px] border border-white/20 bg-white/10 p-5 shadow-[0_24px_80px_rgba(0,10,25,0.35)] backdrop-blur-2xl sm:p-6 ${className}`}
     >
       {children}
     </section>
@@ -340,9 +340,9 @@ function GlassCard({
 
 function DataTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/12 bg-black/15 px-4 py-4">
+      <div className="min-w-0 rounded-2xl border border-white/12 bg-black/15 px-4 py-4">
       <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-white/85">{value}</p>
+        <p className="mt-2 break-words text-sm leading-6 text-white/85">{value}</p>
     </div>
   );
 }
