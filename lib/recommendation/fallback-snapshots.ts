@@ -11,17 +11,20 @@ export function createFallbackLocationSnapshot(): LocationSnapshot {
 }
 
 export function createFallbackWeatherSnapshot(): WeatherSnapshot {
-  const hour = new Date().getHours();
+  const now = new Date();
+  const hour = now.getHours();
   const isDaytime = hour >= 6 && hour < 19;
 
   return {
     mood: "clear",
-    weatherLabel: "잔잔한",
+    weatherLabel: "보통",
     temperature: 22,
     feelsLike: 22,
     humidity: 50,
     windSpeed: 1,
     isDaytime,
-    summary: isDaytime ? "잔잔한 오후" : "잔잔한 밤"
+    summary: isDaytime ? "보통 오후" : "보통 밤",
+    observedAt: Math.floor(now.getTime() / 1000),
+    timezoneOffsetSeconds: 9 * 60 * 60
   };
 }

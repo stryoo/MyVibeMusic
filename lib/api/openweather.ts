@@ -17,6 +17,7 @@ type OpenWeatherResponse = {
     speed: number;
   };
   dt: number;
+  timezone: number;
   sys: {
     sunrise: number;
     sunset: number;
@@ -49,19 +50,19 @@ function toWeatherMood(main: string): WeatherMood {
 function toKoreanWeatherLabel(mood: WeatherMood) {
   switch (mood) {
     case "clear":
-      return "맑은";
+      return "맑음";
     case "clouds":
-      return "흐린";
+      return "흐림";
     case "rain":
-      return "비 오는";
+      return "비";
     case "snow":
-      return "눈 오는";
+      return "눈";
     case "thunderstorm":
-      return "천둥치는";
+      return "천둥";
     case "mist":
-      return "안개 낀";
+      return "안개";
     default:
-      return "잔잔한";
+      return "보통";
   }
 }
 
@@ -92,6 +93,8 @@ export async function getWeatherSnapshot(coordinates: Coordinates): Promise<Weat
     humidity: data.main.humidity,
     windSpeed: data.wind.speed,
     isDaytime,
-    summary: `${cityName} ${weatherLabel} ${timeLabel}`.trim()
+    summary: `${cityName} ${weatherLabel} ${timeLabel}`.trim(),
+    observedAt: data.dt,
+    timezoneOffsetSeconds: data.timezone
   };
 }

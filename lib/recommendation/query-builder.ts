@@ -1,5 +1,5 @@
 import { getMusicStyleQuery } from "@/lib/recommendation/music-style";
-import { buildVibeContext } from "@/lib/recommendation/vibe-map";
+import { buildVibeContext, getWeatherLocalDate } from "@/lib/recommendation/vibe-map";
 import type { Emotion, LocationSnapshot, MusicStyle, WeatherSnapshot } from "@/types";
 
 function getWeatherMusicKeyword(weather: WeatherSnapshot) {
@@ -44,7 +44,7 @@ export function buildYoutubeSearchQuery(
 ) {
   const moment = getMomentLabel(weather);
   const place = location.stationLikeLabel || location.district || location.city;
-  const vibe = buildVibeContext(weather, new Date(), emotion);
+  const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
   const moodPhrase = getWeatherMusicKeyword(weather);
   const stylePhrase = getMusicStyleQuery(musicStyle);
 
@@ -59,6 +59,6 @@ export function buildContextLabel(
   emotion?: Emotion
 ) {
   const moment = getMomentLabel(weather);
-  const vibe = buildVibeContext(weather, new Date(), emotion);
+  const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
   return `${location.city} ${location.district}, ${moment} (${vibe.timeLabel})`;
 }

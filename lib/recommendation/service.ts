@@ -8,7 +8,7 @@ import {
 } from "@/lib/recommendation/fallback-snapshots";
 import { searchYoutubeMusic } from "@/lib/api/youtube";
 import { buildYoutubeSearchQuery } from "@/lib/recommendation/query-builder";
-import { buildVibeContext } from "@/lib/recommendation/vibe-map";
+import { buildVibeContext, getWeatherLocalDate } from "@/lib/recommendation/vibe-map";
 import type { Coordinates, Emotion, MusicStyle, RecommendationPayload } from "@/types";
 
 export async function getMusicRecommendations(
@@ -30,7 +30,7 @@ export async function getMusicRecommendations(
       ? locationResult.value
       : createFallbackLocationSnapshot();
 
-  const vibe = buildVibeContext(weather, new Date(), emotion);
+  const vibe = buildVibeContext(weather, getWeatherLocalDate(weather), emotion);
   const query = buildYoutubeSearchQuery(location, weather, emotion, musicStyle);
   const fallbackList = getFallbackRecommendations(emotion, musicStyle);
 

@@ -20,6 +20,8 @@ export type WeatherSnapshot = {
   windSpeed: number;
   isDaytime: boolean;
   summary: string;
+  observedAt: number;
+  timezoneOffsetSeconds: number;
 };
 
 export type TimeBand = "lateNight" | "morning" | "midday" | "afternoon" | "evening" | "night";

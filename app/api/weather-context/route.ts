@@ -7,7 +7,7 @@ import {
 } from "@/lib/recommendation/fallback-snapshots";
 import { parseEmotion } from "@/lib/recommendation/emotion";
 import { parseMusicStyle } from "@/lib/recommendation/music-style";
-import { buildVibeContext } from "@/lib/recommendation/vibe-map";
+import { buildVibeContext, getWeatherLocalDate } from "@/lib/recommendation/vibe-map";
 import { buildContextLabel, buildYoutubeSearchQuery } from "@/lib/recommendation/query-builder";
 import type { Coordinates } from "@/types";
 import { NextResponse } from "next/server";
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         context: buildContextLabel(location, weather, emotion),
         query: buildYoutubeSearchQuery(location, weather, emotion, musicStyle),
         fallbackUsed: true,
-        vibe: buildVibeContext(weather, new Date(), emotion)
+        vibe: buildVibeContext(weather, getWeatherLocalDate(weather), emotion)
       },
       { status: 200 }
     );
@@ -80,6 +80,6 @@ export async function GET(request: Request) {
     context: buildContextLabel(location, weather, emotion),
     query: buildYoutubeSearchQuery(location, weather, emotion, musicStyle),
     fallbackUsed: weatherResult.status === "rejected" || locationResult.status === "rejected",
-    vibe: buildVibeContext(weather, new Date(), emotion)
+    vibe: buildVibeContext(weather, getWeatherLocalDate(weather), emotion)
   });
 }
