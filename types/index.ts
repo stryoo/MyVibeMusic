@@ -73,6 +73,9 @@ export type RecommendationPayload = {
   recommendations: RecommendationItem[];
   selectedVideo: RecommendationItem | null;
   fallbackUsed: boolean;
+  cacheUsed?: boolean;
+  cacheKey?: string;
+  cachedAt?: string;
   fallbackReason?: string;
   fallbackDetail?: string;
   fetchedAt: string;

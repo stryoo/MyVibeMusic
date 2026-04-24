@@ -8,6 +8,8 @@ type ServerEnv = {
   openWeatherApiKey: string;
   kakaoRestApiKey: string;
   youtubeDataApiKey: string;
+  upstashRedisRestUrl: string;
+  upstashRedisRestToken: string;
 };
 
 function readRequiredEnv(name: string) {
@@ -23,7 +25,9 @@ export const publicEnv: PublicEnv = {
 export const serverEnv: ServerEnv = {
   openWeatherApiKey: readRequiredEnv("OPENWEATHER_API_KEY"),
   kakaoRestApiKey: readRequiredEnv("KAKAO_REST_API_KEY"),
-  youtubeDataApiKey: readRequiredEnv("YOUTUBE_DATA_API_KEY")
+  youtubeDataApiKey: readRequiredEnv("YOUTUBE_DATA_API_KEY"),
+  upstashRedisRestUrl: readRequiredEnv("UPSTASH_REDIS_REST_URL"),
+  upstashRedisRestToken: readRequiredEnv("UPSTASH_REDIS_REST_TOKEN")
 };
 
 export function hasRequiredServerEnv() {
@@ -40,4 +44,8 @@ export function getMissingServerEnvKeys() {
   return Object.entries(required)
     .filter(([, value]) => !value)
     .map(([key]) => key);
+}
+
+export function hasUpstashRedisEnv() {
+  return Boolean(serverEnv.upstashRedisRestUrl && serverEnv.upstashRedisRestToken);
 }

@@ -3,6 +3,10 @@ import { getFallbackRecommendations } from "@/lib/constants/fallback";
 import { getLocationSnapshot } from "@/lib/api/kakao-local";
 import { getWeatherSnapshot } from "@/lib/api/openweather";
 import {
+  getCachedRecommendations,
+  saveCachedRecommendations
+} from "@/lib/cache/youtube-query-cache";
+import {
   createFallbackLocationSnapshot,
   createFallbackWeatherSnapshot
 } from "@/lib/recommendation/fallback-snapshots";
@@ -34,6 +38,26 @@ export async function getMusicRecommendations(
   const queryCandidates = buildYoutubeSearchQueries(location, weather, emotion, musicStyle);
   const query = queryCandidates[0] ?? "";
   const fallbackList = getFallbackRecommendations(emotion, musicStyle, query);
+  const cachedRecommendations = await getCachedRecommendations(queryCandidates);
+
+  if (cachedRecommendations) {
+    const list = cachedRecommendations.recommendations.slice(0, RECOMMENDATION_LIMIT);
+
+    return {
+      coordinates,
+      location,
+      weather,
+      vibe,
+      query: cachedRecommendations.query,
+      recommendations: list,
+      selectedVideo: list[0] ?? null,
+      fallbackUsed: false,
+      cacheUsed: true,
+      cacheKey: cachedRecommendations.key,
+      cachedAt: cachedRecommendations.updatedAt,
+      fetchedAt: new Date().toISOString()
+    };
+  }
 
   try {
     let finalQuery = query;
@@ -45,6 +69,7 @@ export async function getMusicRecommendations(
       if (sliced.length > 0) {
         finalQuery = candidate;
         normalized = sliced;
+        await saveCachedRecommendations(candidate, sliced);
         break;
       }
     }
@@ -60,6 +85,7 @@ export async function getMusicRecommendations(
       recommendations: list,
       selectedVideo: list[0] ?? null,
       fallbackUsed: normalized.length === 0,
+      cacheUsed: false,
       fallbackReason: normalized.length === 0 ? "no_usable_youtube_results" : undefined,
       fetchedAt: new Date().toISOString()
     };

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
   },
   "dependencies": {
+    "@upstash/redis": "^1.37.0",
     "framer-motion": "latest",
     "lucide-react": "latest",
     "next": "latest",
