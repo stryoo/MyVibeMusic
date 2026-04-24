@@ -35,12 +35,26 @@ type YouTubeVideosResponse = {
         default?: { url: string };
       };
     };
+    contentDetails?: {
+      regionRestriction?: {
+        allowed?: string[];
+        blocked?: string[];
+      };
+    };
     status?: {
       embeddable?: boolean;
       privacyStatus?: string;
       uploadStatus?: string;
     };
   }>;
+};
+
+const PLAYBACK_REGION_BY_STYLE: Partial<Record<MusicStyle, string>> = {
+  pop: "US",
+  kpop: "KR",
+  ballad: "KR",
+  indie: "KR",
+  hiphop: "KR"
 };
 
 function getSearchProfile(style?: MusicStyle) {
@@ -104,14 +118,59 @@ function toHydratedRecommendation(item: YouTubeVideosResponse["items"][number]):
   };
 }
 
-async function fetchYouTubeVideoDetails(videoIds: string[]) {
+function isBlockedInRegion(item: YouTubeVideosResponse["items"][number], region: string) {
+  const restriction = item.contentDetails?.regionRestriction;
+
+  if (restriction?.allowed) {
+    return !restriction.allowed.includes(region);
+  }
+
+  if (restriction?.blocked) {
+    return restriction.blocked.includes(region);
+  }
+
+  return false;
+}
+
+function isUnplayableTitle(title: string) {
+  const normalized = title.trim().toLowerCase();
+  return normalized === "deleted video" || normalized === "private video";
+}
+
+function isPlayableVideo(item: YouTubeVideosResponse["items"][number], region: string) {
+  const status = item.status;
+
+  if (!item.id || !item.snippet?.title || isUnplayableTitle(item.snippet.title)) {
+    return false;
+  }
+
+  if (status?.embeddable !== true) {
+    return false;
+  }
+
+  if (status.privacyStatus && !["public", "unlisted"].includes(status.privacyStatus)) {
+    return false;
+  }
+
+  if (status.uploadStatus && status.uploadStatus !== "processed") {
+    return false;
+  }
+
+  if (isBlockedInRegion(item, region)) {
+    return false;
+  }
+
+  return true;
+}
+
+async function fetchYouTubeVideoDetails(videoIds: string[], region: string) {
   if (videoIds.length === 0) {
     return new Map<string, RecommendationItem>();
   }
 
   const url = new URL("https://www.googleapis.com/youtube/v3/videos");
   url.searchParams.set("key", serverEnv.youtubeDataApiKey);
-  url.searchParams.set("part", "snippet,status");
+  url.searchParams.set("part", "snippet,status,contentDetails");
   url.searchParams.set("id", videoIds.join(","));
   url.searchParams.set("maxResults", RECOMMENDATION_LIMIT.toString());
 
@@ -121,14 +180,7 @@ async function fetchYouTubeVideoDetails(videoIds: string[]) {
 
   return new Map(
     data.items
-      .filter((item) => {
-        const status = item.status;
-        return (
-          status?.embeddable !== false &&
-          status?.privacyStatus !== "private" &&
-          status?.uploadStatus !== "rejected"
-        );
-      })
+      .filter((item) => isPlayableVideo(item, region))
       .map((item) => [item.id, toHydratedRecommendation(item)])
   );
 }
@@ -138,6 +190,7 @@ export async function searchYoutubeMusic(
   musicStyle?: MusicStyle
 ): Promise<RecommendationItem[]> {
   const profile = getSearchProfile(musicStyle);
+  const playbackRegion = PLAYBACK_REGION_BY_STYLE[musicStyle ?? "kpop"] ?? "KR";
   const attemptErrors: string[] = [];
   const attempts: SearchAttempt[] = [
     {
@@ -194,7 +247,7 @@ export async function searchYoutubeMusic(
       const videoIds = searchItems.map((item) => item.id.videoId as string);
 
       try {
-        const hydratedMap = await fetchYouTubeVideoDetails(videoIds);
+        const hydratedMap = await fetchYouTubeVideoDetails(videoIds, playbackRegion);
         const hydratedItems = videoIds
           .map((videoId) => hydratedMap.get(videoId))
           .filter((item): item is RecommendationItem => Boolean(item));

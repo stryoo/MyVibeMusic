@@ -4,6 +4,7 @@ import { hasUpstashRedisEnv, serverEnv } from "@/lib/config/env";
 import type { RecommendationItem } from "@/types";
 
 const CACHE_TTL_SECONDS = 60 * 60 * 24 * 14;
+const QUERY_CACHE_VERSION = "v2";
 
 type CachedRecommendationHit = {
   key: string;
@@ -50,7 +51,7 @@ function normalizeRecommendations(recommendations: RecommendationItem[]) {
 }
 
 function getCacheKey(query: string) {
-  return `yt:query:${normalizeQuery(query)}`;
+  return `yt:query:${QUERY_CACHE_VERSION}:${normalizeQuery(query)}`;
 }
 
 function getRedisClient() {

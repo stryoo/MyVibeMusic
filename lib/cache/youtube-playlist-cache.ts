@@ -4,6 +4,7 @@ import { hasUpstashRedisEnv, serverEnv } from "@/lib/config/env";
 import type { RecommendationItem } from "@/types";
 
 const PLAYLIST_CACHE_TTL_SECONDS = 60 * 60 * 24;
+const PLAYLIST_CACHE_VERSION = "v2";
 
 type PlaylistCacheEntry = {
   playlistId: string;
@@ -53,7 +54,7 @@ function getRedisClient() {
 }
 
 function getPlaylistCacheKey(playlistId: string) {
-  return `yt:playlist:${playlistId}`;
+  return `yt:playlist:${PLAYLIST_CACHE_VERSION}:${playlistId}`;
 }
 
 export async function getCachedPlaylistItems(playlistId: string) {

@@ -32,6 +32,12 @@ type YouTubeVideosResponse = {
         default?: { url: string };
       };
     };
+    contentDetails?: {
+      regionRestriction?: {
+        allowed?: string[];
+        blocked?: string[];
+      };
+    };
     status?: {
       embeddable?: boolean;
       privacyStatus?: string;
@@ -39,6 +45,53 @@ type YouTubeVideosResponse = {
     };
   }>;
 };
+
+const PLAYBACK_REGION = "KR";
+
+function isBlockedInRegion(item: YouTubeVideosResponse["items"][number], region = PLAYBACK_REGION) {
+  const restriction = item.contentDetails?.regionRestriction;
+
+  if (restriction?.allowed) {
+    return !restriction.allowed.includes(region);
+  }
+
+  if (restriction?.blocked) {
+    return restriction.blocked.includes(region);
+  }
+
+  return false;
+}
+
+function isUnplayableTitle(title: string) {
+  const normalized = title.trim().toLowerCase();
+  return normalized === "deleted video" || normalized === "private video";
+}
+
+function isPlayableVideo(item: YouTubeVideosResponse["items"][number]) {
+  const status = item.status;
+
+  if (!item.id || !item.snippet?.title || isUnplayableTitle(item.snippet.title)) {
+    return false;
+  }
+
+  if (status?.embeddable !== true) {
+    return false;
+  }
+
+  if (status.privacyStatus && !["public", "unlisted"].includes(status.privacyStatus)) {
+    return false;
+  }
+
+  if (status.uploadStatus && status.uploadStatus !== "processed") {
+    return false;
+  }
+
+  if (isBlockedInRegion(item)) {
+    return false;
+  }
+
+  return true;
+}
 
 function toWatchUrl(videoId: string) {
   return `https://www.youtube.com/watch?v=${videoId}`;
@@ -128,7 +181,7 @@ async function fetchVideoDetails(videoIds: string[]) {
 
   const url = new URL("https://www.googleapis.com/youtube/v3/videos");
   url.searchParams.set("key", serverEnv.youtubeDataApiKey);
-  url.searchParams.set("part", "snippet,status");
+  url.searchParams.set("part", "snippet,status,contentDetails");
   url.searchParams.set("id", videoIds.slice(0, 50).join(","));
   url.searchParams.set("maxResults", Math.min(videoIds.length, 50).toString());
 
@@ -136,16 +189,7 @@ async function fetchVideoDetails(videoIds: string[]) {
     next: { revalidate: 3600 }
   });
 
-  return data.items
-    .filter((item) => {
-      const status = item.status;
-      return (
-        status?.embeddable !== false &&
-        status?.privacyStatus !== "private" &&
-        status?.uploadStatus !== "rejected"
-      );
-    })
-    .map((item) => toRecommendationItem(item));
+  return data.items.filter((item) => isPlayableVideo(item)).map((item) => toRecommendationItem(item));
 }
 
 export async function getPlaylistRecommendations(
