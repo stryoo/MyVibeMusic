@@ -73,7 +73,8 @@ export function StepTwoPreview() {
 
   return (
     <main className="relative min-h-screen overflow-x-hidden overflow-y-hidden bg-[#070f1d] pb-24 text-white">
-      <div className={`pointer-events-none absolute inset-0 ${theme.background}`} />
+      <div className={`pointer-events-none absolute inset-0 ${theme.backgroundClassName}`} />
+      <div className="pointer-events-none absolute inset-0" style={theme.backgroundStyle} />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.08),transparent_24%,rgba(0,0,0,0.24)_100%)]" />
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">
@@ -104,9 +105,10 @@ export function StepTwoPreview() {
                   onClick={() => handleSelectEmotion(item.id)}
                   className={`rounded-full border px-4 py-2 text-sm transition ${
                     active
-                      ? `bg-gradient-to-r ${theme.accent} ${theme.chip} text-white`
+                      ? ""
                       : "border-white/15 bg-white/8 text-white/75 hover:bg-white/15"
                   }`}
+                  style={active ? theme.activeChipStyle : undefined}
                 >
                   {item.label}
                 </button>
@@ -124,9 +126,10 @@ export function StepTwoPreview() {
                   onClick={() => handleSelectMusicStyle(item.id)}
                   className={`rounded-full border px-4 py-2 text-sm transition ${
                     active
-                      ? `bg-gradient-to-r ${theme.accent} ${theme.chip} text-white`
+                      ? ""
                       : "border-white/15 bg-white/8 text-white/75 hover:bg-white/15"
                   }`}
+                  style={active ? theme.activeChipStyle : undefined}
                 >
                   {item.label}
                 </button>
@@ -229,7 +232,7 @@ export function StepTwoPreview() {
             className="min-w-0 space-y-6"
           >
             <GlassCard className="relative overflow-hidden">
-              <div className={`pointer-events-none absolute -inset-10 rounded-[42px] ${theme.glow}`} />
+              <div className="pointer-events-none absolute -inset-10 rounded-[42px]" style={theme.glowStyle} />
               <div className="relative">
                 <CardTitle icon={<PlayCircle className="h-5 w-5" />} subtitle="Now Playing" title="Main Player" />
 
@@ -239,7 +242,7 @@ export function StepTwoPreview() {
                   ) : (
                     <>
                       <div className="relative">
-                        <div className={`pointer-events-none absolute -inset-4 rounded-[26px] ${theme.glow}`} />
+                        <div className="pointer-events-none absolute -inset-4 rounded-[26px]" style={theme.cardGlowStyle} />
                         <YouTubePlayer
                           key={selectedVideo?.videoId ?? "empty-player"}
                           videoId={selectedVideo?.videoId ?? null}
