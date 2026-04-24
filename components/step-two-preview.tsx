@@ -75,6 +75,7 @@ export function StepTwoPreview() {
     <main className="relative min-h-screen overflow-x-hidden overflow-y-hidden bg-[#070f1d] pb-24 text-white">
       <div className={`pointer-events-none absolute inset-0 ${theme.backgroundClassName}`} />
       <div className="pointer-events-none absolute inset-0" style={theme.backgroundStyle} />
+      <div className="pointer-events-none absolute inset-0" style={theme.weatherOverlayStyle} />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.08),transparent_24%,rgba(0,0,0,0.24)_100%)]" />
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">

@@ -5,98 +5,161 @@ import type { Emotion, WeatherMood } from "@/types";
 type Theme = {
   backgroundClassName: string;
   backgroundStyle: CSSProperties;
+  weatherOverlayStyle: CSSProperties;
   glowStyle: CSSProperties;
   cardGlowStyle: CSSProperties;
   activeChipStyle: CSSProperties;
 };
 
-type WeatherThemeBase = {
+type EmotionBaseTheme = {
   className: string;
+  hue: number;
   glowRgb: string;
 };
 
-const WEATHER_THEMES: Record<WeatherMood, WeatherThemeBase> = {
-  clear: {
+const EMOTION_THEMES: Record<Emotion, EmotionBaseTheme> = {
+  calm: {
     className:
-      "bg-[radial-gradient(circle_at_10%_10%,rgba(125,211,252,0.30),transparent_36%),radial-gradient(circle_at_90%_0%,rgba(251,191,36,0.24),transparent_38%),linear-gradient(155deg,#102a43_0%,#1d4e89_42%,#0b1f38_100%)]",
-    glowRgb: "125,211,252"
+      "bg-[radial-gradient(circle_at_14%_14%,rgba(94,234,212,0.24),transparent_30%),radial-gradient(circle_at_84%_10%,rgba(125,211,252,0.18),transparent_32%),linear-gradient(155deg,#082f49_0%,#0f766e_42%,#071826_100%)]",
+    hue: 170,
+    glowRgb: "94,234,212"
   },
-  clouds: {
+  happy: {
     className:
-      "bg-[radial-gradient(circle_at_15%_0%,rgba(148,163,184,0.28),transparent_34%),radial-gradient(circle_at_80%_15%,rgba(226,232,240,0.12),transparent_42%),linear-gradient(165deg,#1f2937_0%,#334155_46%,#0f172a_100%)]",
-    glowRgb: "148,163,184"
+      "bg-[radial-gradient(circle_at_14%_12%,rgba(253,224,71,0.26),transparent_28%),radial-gradient(circle_at_84%_14%,rgba(251,146,60,0.20),transparent_32%),linear-gradient(155deg,#3b1900_0%,#7c2d12_38%,#1a1020_100%)]",
+    hue: 42,
+    glowRgb: "251,191,36"
   },
-  rain: {
+  sad: {
     className:
-      "bg-[radial-gradient(circle_at_0%_10%,rgba(56,189,248,0.22),transparent_32%),radial-gradient(circle_at_90%_5%,rgba(59,130,246,0.20),transparent_34%),linear-gradient(160deg,#0b132b_0%,#1e3a8a_45%,#0f172a_100%)]",
-    glowRgb: "56,189,248"
+      "bg-[radial-gradient(circle_at_12%_12%,rgba(96,165,250,0.22),transparent_28%),radial-gradient(circle_at_84%_16%,rgba(129,140,248,0.18),transparent_32%),linear-gradient(160deg,#111827_0%,#1d4ed8_40%,#0f172a_100%)]",
+    hue: 220,
+    glowRgb: "96,165,250"
   },
-  snow: {
+  focus: {
     className:
-      "bg-[radial-gradient(circle_at_12%_12%,rgba(255,255,255,0.26),transparent_30%),radial-gradient(circle_at_84%_8%,rgba(191,219,254,0.22),transparent_36%),linear-gradient(160deg,#1e293b_0%,#475569_44%,#0f172a_100%)]",
-    glowRgb: "226,232,240"
+      "bg-[radial-gradient(circle_at_14%_12%,rgba(34,211,238,0.22),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(45,212,191,0.18),transparent_32%),linear-gradient(160deg,#082f49_0%,#155e75_40%,#07131f_100%)]",
+    hue: 192,
+    glowRgb: "34,211,238"
   },
-  thunderstorm: {
+  romantic: {
     className:
-      "bg-[radial-gradient(circle_at_8%_0%,rgba(167,139,250,0.34),transparent_34%),radial-gradient(circle_at_92%_5%,rgba(99,102,241,0.25),transparent_36%),linear-gradient(165deg,#111827_0%,#312e81_45%,#0f172a_100%)]",
-    glowRgb: "129,140,248"
+      "bg-[radial-gradient(circle_at_14%_12%,rgba(244,114,182,0.24),transparent_28%),radial-gradient(circle_at_84%_18%,rgba(251,113,133,0.18),transparent_32%),linear-gradient(160deg,#3f0d24_0%,#7f1d4e_40%,#190d1f_100%)]",
+    hue: 336,
+    glowRgb: "244,114,182"
   },
-  mist: {
+  energetic: {
     className:
-      "bg-[radial-gradient(circle_at_8%_10%,rgba(209,213,219,0.26),transparent_34%),radial-gradient(circle_at_88%_10%,rgba(203,213,225,0.22),transparent_38%),linear-gradient(155deg,#111827_0%,#1f2937_42%,#0b1120_100%)]",
-    glowRgb: "203,213,225"
+      "bg-[radial-gradient(circle_at_12%_12%,rgba(251,146,60,0.26),transparent_28%),radial-gradient(circle_at_84%_16%,rgba(248,113,113,0.20),transparent_32%),linear-gradient(160deg,#431407_0%,#9a3412_40%,#1f172a_100%)]",
+    hue: 18,
+    glowRgb: "251,146,60"
   }
-};
-
-const EMOTION_HUES: Record<Emotion, number> = {
-  calm: 170,
-  happy: 42,
-  sad: 220,
-  focus: 192,
-  romantic: 336,
-  energetic: 18
 };
 
 function hsla(hue: number, saturation: number, lightness: number, alpha: number) {
   return `hsla(${hue} ${saturation}% ${lightness}% / ${alpha})`;
 }
 
-function createEmotionOverlay(hue: number): CSSProperties {
-  return {
-    backgroundImage: [
-      `radial-gradient(circle at 18% 14%, ${hsla(hue, 88, 66, 0.2)}, transparent 28%)`,
-      `radial-gradient(circle at 82% 16%, ${hsla((hue + 32) % 360, 84, 62, 0.16)}, transparent 30%)`,
-      `radial-gradient(circle at 50% 85%, ${hsla((hue + 340) % 360, 80, 58, 0.12)}, transparent 32%)`
-    ].join(",")
-  };
+function createWeatherOverlay(mood: WeatherMood | undefined): CSSProperties {
+  switch (mood ?? "clear") {
+    case "clear":
+      return {
+        backgroundImage: [
+          "radial-gradient(circle at 10% 10%, rgba(255,255,255,0.12), transparent 26%)",
+          "radial-gradient(circle at 88% 8%, rgba(255,215,120,0.16), transparent 28%)"
+        ].join(",")
+      };
+    case "clouds":
+      return {
+        backgroundImage: [
+          "radial-gradient(circle at 18% 12%, rgba(203,213,225,0.12), transparent 28%)",
+          "radial-gradient(circle at 82% 18%, rgba(148,163,184,0.14), transparent 30%)"
+        ].join(",")
+      };
+    case "rain":
+      return {
+        backgroundImage: [
+          "linear-gradient(180deg, rgba(125,211,252,0.08) 0%, rgba(59,130,246,0.04) 100%)",
+          "radial-gradient(circle at 85% 12%, rgba(56,189,248,0.14), transparent 28%)"
+        ].join(",")
+      };
+    case "snow":
+      return {
+        backgroundImage: [
+          "radial-gradient(circle at 16% 12%, rgba(255,255,255,0.16), transparent 26%)",
+          "radial-gradient(circle at 84% 14%, rgba(191,219,254,0.14), transparent 30%)"
+        ].join(",")
+      };
+    case "thunderstorm":
+      return {
+        backgroundImage: [
+          "radial-gradient(circle at 18% 10%, rgba(167,139,250,0.16), transparent 28%)",
+          "radial-gradient(circle at 84% 12%, rgba(99,102,241,0.18), transparent 28%)"
+        ].join(",")
+      };
+    case "mist":
+      return {
+        backgroundImage: [
+          "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+          "radial-gradient(circle at 82% 18%, rgba(226,232,240,0.12), transparent 30%)"
+        ].join(",")
+      };
+    default:
+      return {};
+  }
 }
 
-function createGlowStyle(hue: number, weatherGlowRgb: string, spread: string): CSSProperties {
+function getWeatherGlowRgb(mood: WeatherMood | undefined) {
+  switch (mood ?? "clear") {
+    case "clear":
+      return "251,191,36";
+    case "clouds":
+      return "148,163,184";
+    case "rain":
+      return "56,189,248";
+    case "snow":
+      return "226,232,240";
+    case "thunderstorm":
+      return "129,140,248";
+    case "mist":
+      return "203,213,225";
+    default:
+      return "255,255,255";
+  }
+}
+
+function createGlowStyle(hue: number, emotionGlowRgb: string, weatherGlowRgb: string, spread: string): CSSProperties {
   return {
     boxShadow: [
-      `0 0 ${spread} rgba(${weatherGlowRgb},0.28)`,
-      `0 0 calc(${spread} + 28px) ${hsla(hue, 88, 64, 0.16)}`
+      `0 0 ${spread} rgba(${emotionGlowRgb},0.22)`,
+      `0 0 calc(${spread} + 22px) rgba(${weatherGlowRgb},0.14)`,
+      `0 0 calc(${spread} + 42px) ${hsla(hue, 88, 64, 0.12)}`
     ].join(", ")
   };
 }
 
 function createActiveChipStyle(hue: number): CSSProperties {
   return {
-    backgroundImage: `linear-gradient(135deg, ${hsla(hue, 90, 66, 0.32)}, ${hsla((hue + 26) % 360, 88, 62, 0.18)})`,
-    borderColor: hsla(hue, 82, 78, 0.42),
+    backgroundImage: `linear-gradient(135deg, ${hsla(hue, 88, 66, 0.3)}, ${hsla((hue + 28) % 360, 84, 62, 0.18)})`,
+    borderColor: hsla(hue, 78, 76, 0.4),
     color: "white"
   };
 }
 
 export function getWeatherTheme(mood?: WeatherMood, emotion: Emotion = "calm"): Theme {
-  const weatherTheme = WEATHER_THEMES[mood ?? "clear"];
-  const emotionHue = EMOTION_HUES[emotion];
+  const emotionTheme = EMOTION_THEMES[emotion];
+  const weatherGlowRgb = getWeatherGlowRgb(mood);
 
   return {
-    backgroundClassName: weatherTheme.className,
-    backgroundStyle: createEmotionOverlay(emotionHue),
-    glowStyle: createGlowStyle(emotionHue, weatherTheme.glowRgb, "122px"),
-    cardGlowStyle: createGlowStyle(emotionHue, weatherTheme.glowRgb, "78px"),
-    activeChipStyle: createActiveChipStyle(emotionHue)
+    backgroundClassName: emotionTheme.className,
+    backgroundStyle: {
+      backgroundImage: [
+        `radial-gradient(circle at 50% 80%, ${hsla((emotionTheme.hue + 340) % 360, 80, 54, 0.12)}, transparent 34%)`
+      ].join(",")
+    },
+    weatherOverlayStyle: createWeatherOverlay(mood),
+    glowStyle: createGlowStyle(emotionTheme.hue, emotionTheme.glowRgb, weatherGlowRgb, "122px"),
+    cardGlowStyle: createGlowStyle(emotionTheme.hue, emotionTheme.glowRgb, weatherGlowRgb, "78px"),
+    activeChipStyle: createActiveChipStyle(emotionTheme.hue)
   };
 }
