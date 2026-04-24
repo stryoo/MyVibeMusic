@@ -22,6 +22,7 @@ type AppState = {
   selectedVideoId: string | null;
   status: AppLoadStatus;
   errorMessage: string | null;
+  requestToken: number;
 
   setEmotion: (emotion: Emotion) => void;
   setMusicStyle: (musicStyle: MusicStyle) => void;
@@ -40,6 +41,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedVideoId: null,
   status: "idle",
   errorMessage: null,
+  requestToken: 0,
 
   clearError: () => set({ errorMessage: null }),
 
@@ -58,12 +60,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refresh: async (coordinates) => {
     const current = get();
+    const nextRequestToken = current.requestToken + 1;
     set({
       coordinates,
       status: "loading",
       errorMessage: null,
       weatherContext: current.weatherContext,
-      recommendations: current.recommendations
+      recommendations: current.recommendations,
+      requestToken: nextRequestToken
     });
 
     try {
@@ -79,6 +83,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         recommendationPayload.recommendations[0]?.videoId ??
         null;
 
+      if (get().requestToken !== nextRequestToken) {
+        return;
+      }
+
       set({
         coordinates,
         weatherContext: contextPayload,
@@ -89,6 +97,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load recommendations.";
+      if (get().requestToken !== nextRequestToken) {
+        return;
+      }
       set({
         coordinates,
         status: "error",

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 type Props = {
   videoId: string | null;
   className?: string;
@@ -18,15 +20,28 @@ function buildEmbedUrl(videoId: string) {
 }
 
 export function YouTubePlayer({ videoId, className = "" }: Props) {
+  const [mountedVideoId, setMountedVideoId] = useState<string | null>(videoId);
+
+  useEffect(() => {
+    setMountedVideoId(null);
+
+    const frameId = window.requestAnimationFrame(() => {
+      setMountedVideoId(videoId);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [videoId]);
+
   return (
     <div
-      key={videoId ?? "empty-player"}
+      key={mountedVideoId ?? "empty-player"}
       className={`relative overflow-hidden rounded-[24px] bg-black ${className}`}
     >
-      {videoId ? (
+      {mountedVideoId ? (
         <iframe
-          src={buildEmbedUrl(videoId)}
-          title="YouTube player"
+          key={mountedVideoId}
+          src={buildEmbedUrl(mountedVideoId)}
+          title={`YouTube player ${mountedVideoId}`}
           className="absolute inset-0 h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen

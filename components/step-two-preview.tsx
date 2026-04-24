@@ -250,6 +250,9 @@ export function StepTwoPreview() {
                         {selectedVideo?.title ?? "선택된 곡이 없습니다."}
                       </h3>
                       <p className="mt-2 text-sm text-white/62">{selectedVideo?.channelTitle ?? "채널 정보 없음"}</p>
+                      {selectedVideo?.watchUrl ? (
+                        <p className="mt-2 break-all text-xs text-white/45">{selectedVideo.watchUrl}</p>
+                      ) : null}
                     </>
                   )}
                 </div>
