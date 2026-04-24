@@ -87,7 +87,7 @@ export function StepTwoPreview() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.26em] text-white/80">
             <Sparkles className="h-4 w-4" />
-            Step 4 Visual
+            My Vibe Music 2026-04-24-1443
           </div>
 
           <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">Weather Mood Player</h1>
