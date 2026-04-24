@@ -92,8 +92,8 @@ export function StepTwoPreview() {
 
           <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">Weather Mood Player</h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-            날씨 분위기에 맞춰 배경이 바뀌고, 감정 선택에 따라 추천 문맥과 플레이리스트가 반응하는
-            글래스모피즘 플레이어 화면입니다.
+            감정 색상환을 중심으로 배경이 바뀌고, 현재 날씨가 그 위에 분위기 오버레이를 더해주며,
+            감정 선택에 따라 추천 문맥과 플레이리스트가 함께 반응하는 글래스모피즘 플레이어 화면입니다.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
